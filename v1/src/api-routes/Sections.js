@@ -1,15 +1,16 @@
 //validate middleware
 const validate = require('../middlewares/validate');
 //validations
-const schemas = require('../validations/Projects');
+const schemas = require('../validations/Sections');
 
 const express = require('express');
-const { index, create, update, deleteProject } = require('../controllers/Projects');
+const { index, create, update, deleteSection } = require('../controllers/Sections');
+// const { index, create, update, deleteSection } = require('../controllers/Sections');
 const authenticate = require('../middlewares/authenticate');
 const router = express.Router();
 
 router
-    .route("/")
+    .route("/:projectId")
     .get(authenticate, index);
 router
     .route("/")
@@ -21,6 +22,6 @@ router
 
 router
     .route("/:id")
-    .delete(authenticate, deleteProject);
+    .delete(authenticate, deleteSection);
 
 module.exports = router;
