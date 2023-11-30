@@ -6,6 +6,7 @@ const { ProjectRoutes, UserRoutes, SectionsRoutes, TaskRoutes } = require('./api
 const loaders = require('./loaders');
 const events = require('./scripts/events')
 const path = require("path");
+const errorHandler = require('./middlewares/errorHandler');
 
 
 config();
@@ -27,5 +28,13 @@ app.listen(process.env.APP_PORT, () => {
     app.use("/sections", SectionsRoutes);
     app.use("/tasks", TaskRoutes);
 
+    app.use((req, res, next) => {
+        const error = new Error("are you lost?");
+        error.status = 404;
+        next(error);
+    });
+
+    //! Error Handler
+    app.use(errorHandler);
 
 });

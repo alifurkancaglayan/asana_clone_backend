@@ -1,26 +1,28 @@
 //validate middleware
 const validate = require('../middlewares/validate');
+const authenticate = require('../middlewares/authenticate');
+const idChecker = require('../middlewares/idChecker');
+
 //validations
 const schemas = require('../validations/Projects');
 
 const express = require('express');
-const { index, create, update, deleteProject } = require('../controllers/Projects');
-const authenticate = require('../middlewares/authenticate');
+const ProjectController = require('../controllers/Project');
 const router = express.Router();
 
 router
     .route("/")
-    .get(authenticate, index);
+    .get(authenticate, ProjectController.index);
 router
     .route("/")
-    .post(authenticate, validate(schemas.createValidation), create);
+    .post(authenticate, validate(schemas.createValidation), ProjectController.create);
 
 router
     .route("/:id")
-    .patch(authenticate, validate(schemas.updateValidation), update);
+    .patch(idChecker(), authenticate, validate(schemas.updateValidation), ProjectController.update);
 
 router
     .route("/:id")
-    .delete(authenticate, deleteProject);
+    .delete(idChecker(), authenticate, ProjectController.deleteProject);
 
 module.exports = router;
