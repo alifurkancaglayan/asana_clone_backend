@@ -1,16 +1,18 @@
-const { insert, list, loginUser, modify, remove } = require('../services/Users');
-const projectService = require("../services/Projects")
 const httpStatus = require('http-status');
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require('../scripts/utils/helper');
 const uuid = require("uuid");
 const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
 
+const UserService = require('../services/UsersService');
+
+const ProjectService = require('../services/ProjectsService');
+
 
 const create = (req, res) => {
 
     req.body.password = passwordToHash(req.body.password);
-    insert(req.body)
+    UserService.create(req.body)
         .then((response) => {
 
             res.status(httpStatus.CREATED).send(response);
@@ -23,8 +25,9 @@ const create = (req, res) => {
 
 const login = (req, res) => {
     req.body.password = passwordToHash(req.body.password);
+    console.log(UserService.findOneData(req.body));
 
-    loginUser(req.body)
+    UserService.findOneData(req.body)
         .then((user) => {
             if (!user) {
                 return res.status(httpStatus.NOT_FOUND).send({ message: 'Böyle bir kullanıcı bulunamadı.' });
@@ -48,7 +51,7 @@ const login = (req, res) => {
 
 const index = (req, res) => {
 
-    list().then((response) => {
+    UserService.list().then((response) => {
         res.status(httpStatus.OK).send(response);
     })
         .catch((e) => {
@@ -58,7 +61,7 @@ const index = (req, res) => {
 }
 
 const projectList = (req, res) => {
-    projectService
+    ProjectService
         .list({ user_id: req.user?._id })
         .then((projects) => {
             res.status(httpStatus.OK).send(projects);
@@ -76,7 +79,7 @@ const resetPassword = (req, res) => {
     const new_password = uuid.v4()?.split('-')[0] || `usr-${new Date().getTime()}`;
     console.log(new_password);
 
-    modify({ email: req.body.email }, { password: passwordToHash(new_password) })
+    UserService.updateWhere({ email: req.body.email }, { password: passwordToHash(new_password) })
         .then(updatedUser => {
             if (!updatedUser) {
                 return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunamadı." });
@@ -97,7 +100,7 @@ const resetPassword = (req, res) => {
 }
 
 const update = (req, res) => {
-    modify({ _id: req.user?._id }, req.body)
+    UserService.update(req.user?._id, req.body)
         .then(updatedUser => {
             res.status(httpStatus.OK).send(updatedUser);
         })
@@ -109,7 +112,7 @@ const update = (req, res) => {
 }
 const changePassword = (req, res) => {
     req.body.password = passwordToHash(req.body.password);
-    modify({ _id: req.user?._id }, req.body)
+    UserService.update(req.user?._id, req.body)
         .then(updatedUser => {
             res.status(httpStatus.OK).send(updatedUser);
         })
@@ -126,7 +129,7 @@ const deleteUser = (req, res) => {
             message: "ID Bilgisi Eksik",
         });
     }
-    remove(req.params?.id)
+    UserService.delete(req.params?.id)
         .then((deletedItem) => {
             if (!deletedItem) {
                 res.status(httpStatus.NOT_FOUND).send({
@@ -168,7 +171,7 @@ const updateProfileImage = (req, res) => {
                 error: err
             });
         }
-        modify({ _id: req.user._id }, { profile_image: fileName })
+        UserService.update(req.user._id, fileName)
             .then(updatedUser => {
                 res.status(httpStatus.OK).send(updatedUser);
             })

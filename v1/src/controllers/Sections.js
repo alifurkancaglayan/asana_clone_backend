@@ -1,7 +1,6 @@
 const { response } = require('express');
-const { insert, modify, list, remove } = require('../services/Sections');
 const httpStatus = require('http-status');
-
+const SectionService = require('../services/SectionsService');
 
 const index = (req, res) => {
     if (!req.params?.projectId) {
@@ -9,7 +8,7 @@ const index = (req, res) => {
             error: "Proje ID bilgisi eksik.."
         });
     }
-    list({ project_id: req.params?.projectId })
+    SectionService.list({ project_id: req.params?.projectId })
         .then((response) => {
             res.status(httpStatus.OK).send(response);
         })
@@ -21,7 +20,7 @@ const index = (req, res) => {
 
 const create = (req, res) => {
     req.body.user_id = req.user;
-    insert(req.body)
+    SectionService.create(req.body)
         .then((response) => {
 
             res.status(httpStatus.CREATED).send(response);
@@ -38,7 +37,7 @@ const update = (req, res) => {
             message: "ID Bilgisi Eksik",
         });
     }
-    modify(req.body, req.params?.id)
+    SectionService.update(req.params?.id, req.body)
         .then((updatedDoc) => {
             res.status(httpStatus.OK).send(updatedDoc);
         })
@@ -53,7 +52,7 @@ const deleteSection = (req, res) => {
             message: "ID Bilgisi Eksik",
         });
     }
-    remove(req.params?.id)
+    SectionService.delete(req.params?.id)
         .then((deletedItem) => {
 
             if (!deletedItem) {

@@ -5,7 +5,7 @@ const schemas = require('../validations/Sections');
 
 const express = require('express');
 const { index, create, update, deleteSection } = require('../controllers/Sections');
-// const { index, create, update, deleteSection } = require('../controllers/Sections');
+
 const authenticate = require('../middlewares/authenticate');
 const router = express.Router();
 
